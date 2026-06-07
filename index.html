@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIXDM — Download Manager</title>
+  <meta name="description" content="MIXDM is a high-performance download manager supporting HTTP/HTTPS segmented downloads and YouTube/Social Media via yt-dlp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<!-- Custom Titlebar for Frameless Electron App -->
+<div class="window-titlebar" id="window-titlebar">
+  <div class="titlebar-drag-area"></div>
+  <div class="titlebar-logo">⚡</div>
+  <div class="titlebar-title">MIXDM</div>
+  <div class="titlebar-controls">
+    <button class="titlebar-btn btn-minimize" id="titlebar-minimize" title="Minimize">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+    <button class="titlebar-btn btn-maximize" id="titlebar-maximize" title="Maximize">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+    </button>
+    <button class="titlebar-btn btn-close" id="titlebar-close" title="Close">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Login Screen Overlay -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">⚡</div>
+    <h1 class="login-title" id="auth-title" data-i18n="auth_title">MIXDM</h1>
+    <div class="login-subtitle" id="auth-subtitle" data-i18n="auth_subtitle">Segmented Download Manager Prototype</div>
+    
+    <div class="login-error" id="login-error"></div>
+    
+    <!-- Login Form -->
+    <form class="login-form" id="login-form">
+      <div class="login-group">
+        <label class="login-label" for="login-username" data-i18n="label_username">Email or Username (อีเมล หรือ ชื่อผู้ใช้)</label>
+        <input type="text" id="login-username" class="login-input" placeholder="Enter email or username" data-i18n-placeholder="placeholder_username" autocomplete="username" required />
+      </div>
+      
+      <div class="login-group">
+        <label class="login-label" for="login-password" data-i18n="label_password">Password (รหัสผ่าน)</label>
+        <input type="password" id="login-password" class="login-input" placeholder="Enter password" data-i18n-placeholder="placeholder_password" autocomplete="current-password" required />
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%; justify-content: flex-start; margin-top: 4px; padding-left: 2px;">
+          <input type="checkbox" id="login-remember" style="width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; margin: 0;" />
+          <label for="login-remember" style="font-size: 12px; color: var(--text-secondary); cursor: pointer; user-select: none;" data-i18n="label_remember">Remember Me (จดจำการเข้าสู่ระบบ)</label>
+        </div>
+      </div>
+      
+      <button type="submit" class="login-btn" id="login-btn">
+        <span class="spinner" id="login-spinner"></span>
+        <span data-i18n="btn_login">Login (เข้าสู่ระบบ)</span>
+      </button>
+
+      <div style="text-align: center; margin-top: 16px; font-size: 13px;">
+        <span style="color: var(--text-dim);" data-i18n="no_account">Don't have an account? </span>
+        <a href="#" id="link-to-signup" style="color: var(--accent); text-decoration: none; font-weight: 600;" data-i18n="link_signup">Sign Up (สมัครใช้งาน)</a>
+      </div>
+    </form>
+
+    <!-- Sign-Up Form -->
+    <form class="login-form" id="signup-form" style="display: none;">
+      <div class="login-group">
+        <label class="login-label" for="signup-displayname" data-i18n="label_display_name">Display Name (ชื่อที่แสดง)</label>
+        <input type="text" id="signup-displayname" class="login-input" placeholder="Enter display name" data-i18n-placeholder="placeholder_display_name" required />
+      </div>
+
+      <div class="login-group">
+        <label class="login-label" for="signup-email" data-i18n="signup_email_label">Email Address (อีเมล)</label>
+        <input type="email" id="signup-email" class="login-input" placeholder="Enter email address" data-i18n-placeholder="signup_email_placeholder" autocomplete="email" required />
+      </div>
+      
+      <div class="login-group">
+        <label class="login-label" for="signup-password" data-i18n="label_password">Password (รหัสผ่าน)</label>
+        <input type="password" id="signup-password" class="login-input" placeholder="Min. 6 characters" data-i18n-placeholder="placeholder_password_signup" autocomplete="new-password" required />
+      </div>
+
+      <div class="login-group">
+        <label class="login-label" for="signup-confirm-password" data-i18n="label_confirm_password">Confirm Password (ยืนยันรหัสผ่าน)</label>
+        <input type="password" id="signup-confirm-password" class="login-input" placeholder="Re-enter password" data-i18n-placeholder="placeholder_confirm_password" autocomplete="new-password" required />
+      </div>
+      
+      <button type="submit" class="login-btn" id="signup-btn" style="background: linear-gradient(135deg, var(--accent-2), #d82b56); box-shadow: 0 4px 14px rgba(255, 105, 146, 0.25);">
+        <span class="spinner" id="signup-spinner"></span>
+        <span data-i18n="btn_signup">Sign Up (สมัครใช้งาน)</span>
+      </button>
+      
+      <div style="text-align: center; margin-top: 16px; font-size: 13px;">
+        <span style="color: var(--text-dim);" data-i18n="already_account">Already have an account? </span>
+        <a href="#" id="link-to-login" style="color: var(--accent); text-decoration: none; font-weight: 600;" data-i18n="link_login">Login (เข้าสู่ระบบ)</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-menu-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </div>
+      <a href="#" class="sidebar-icon active" title="Home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </a>
+      <a href="#" class="sidebar-icon" id="sidebar-btn-files" title="Files">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      </a>
+      <a href="#" class="sidebar-icon" id="sidebar-btn-feedback" title="Messages">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </a>
+      <a href="#" class="sidebar-icon" id="sidebar-btn-pricing" title="Subscription">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"></path><path d="M3 20h18v2H3z"></path></svg>
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <a href="#" class="sidebar-icon btn-settings-sidebar" id="sidebar-btn-settings" title="Settings" data-i18n-title="btn_settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">MIXDM</div>
+      </div>
+      
+      <div class="search-bar">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search for Application here" />
+      </div>
+
+      <div class="topbar-actions">
+        <div class="notification-wrapper" style="position: relative; display: flex; align-items: center;">
+          <button class="topbar-icon-btn" id="btn-notifications" title="Notifications" data-i18n-title="notifications_title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="notification-dot" id="noti-dot"></span>
+          </button>
+
+          <!-- Notifications Dropdown Popover -->
+          <div class="notifications-dropdown" id="notifications-dropdown">
+            <div class="notifications-header">
+              <span class="notifications-title" data-i18n="noti_title">Notifications</span>
+              <button class="notifications-clear-all" id="btn-noti-mark-read" data-i18n="noti_mark_read">Mark all as read</button>
+            </div>
+            <div class="notifications-list" id="notifications-list"></div>
+            <div class="notifications-footer">
+              <button class="btn-clear-noti" id="btn-clear-all-noti" data-i18n="noti_clear_all">Clear all</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-menu-wrapper" id="profile-menu-wrapper">
+          <button class="profile-section" id="profile-section-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <div class="profile-text">
+              <div class="profile-name" id="user-display-name">Nicklas Larsen</div>
+              <div class="profile-role" id="user-display-role">Admin</div>
+            </div>
+            <div class="profile-avatar" id="user-display-avatar">👤</div>
+            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown" role="menu">
+            <button class="profile-dropdown-item" id="profile-menu-settings" type="button" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.8-4 14.2-4 16 0"></path></svg>
+              <span data-i18n="profile_title">Profile Settings</span>
+            </button>
+            <button class="profile-dropdown-item danger" id="profile-menu-logout" type="button" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span data-i18n="btn_logout">Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hidden Stats for JS compatibility -->
+    <div class="header-stats" style="display:none;">
+      <div class="stat"><div class="stat-value" id="stat-active">0</div></div>
+      <div class="stat"><div class="stat-value" id="stat-speed">0 KB/s</div></div>
+      <div class="stat"><div class="stat-value" id="stat-done">0</div></div>
+      <!-- Old buttons mapped via JS or just kept for reference -->
+      <button id="btn-open-settings" style="display:none;"></button>
+      <button id="btn-open-dev" style="display:none;"></button>
+      <button id="btn-open-report" style="display:none;"></button>
+      <button id="btn-logout" style="display:none;"></button>
+    </div>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header-text">
+      <h2>Dashboard</h2>
+      <div class="view-toggles">
+        <span class="view-label">Graphical View</span>
+        <button class="view-btn active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></button>
+        <button class="view-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Top Row (Downloading File Info + New Download) -->
+      <div class="dashboard-top-row">
+        <!-- Left Card (Downloading File Info) -->
+        <div class="dash-card file-info-card">
+          <div class="card-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h3>Downloading File Info</h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+          </div>
+          
+          <div class="file-info-content" id="dashboard-file-info">
+            <div class="file-info-header">
+              <div class="file-icon-large">📄</div>
+              <div class="file-details-col">
+                <div class="file-name" id="dash-file-name" style="font-weight:700; color:var(--text-primary); font-size:16px; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">No active downloads</div>
+                <div class="file-size-progress" id="dash-file-size" style="font-size:13px; color:var(--text-dim);">-</div>
+              </div>
+            </div>
+            
+            <div class="progress-bar-wrap" style="margin-top:20px; height:8px; background:rgba(255,255,255,0.05);">
+              <div class="progress-bar" id="dash-progress-bar" style="width:0%; background:linear-gradient(90deg, #6366f1, #8b5cf6);"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--text-secondary);">
+              <span id="dash-progress-text">0%</span>
+              <span id="dash-eta-text">ETA: -</span>
+            </div>
+            <div class="file-info-actions" id="dash-action-controls"></div>
+          </div>
+        </div>
+
+        <!-- Add Download Panel (Moved Here) -->
+        <section class="add-panel" id="add-panel" aria-label="Add new download">
+          <div class="add-panel-title" id="panel-title">
+            <span id="panel-icon">⬇️</span>
+            <span id="panel-label" data-i18n="panel_title_new">New Download</span>
+          </div>
+
+          <div class="url-row">
+            <input
+              type="url"
+              id="url-input"
+              class="url-input"
+              placeholder="Paste URL here — supports YouTube, HTTP/HTTPS, direct file links..."
+              data-i18n-placeholder="placeholder_url"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div class="url-row-buttons">
+              <button class="btn btn-ghost" id="btn-analyze" title="Analyze URL" data-i18n-title="btn_analyze"><span data-i18n="btn_analyze">🔍 Analyze</span></button>
+              <button class="btn btn-primary" id="btn-download" disabled data-i18n="btn_download">⬇ Download</button>
+            </div>
+          </div>
+
+          <!-- Video Preview (YouTube/Social) -->
+          <div class="video-preview" id="video-preview">
+            <img class="video-thumb" id="video-thumb" src="" alt="thumbnail" onerror="this.style.display='none'" />
+            <div class="video-info">
+              <div class="video-title" id="video-title"></div>
+              <div class="video-meta">
+                <span id="platform-badge" class="platform-badge"></span>
+                <span id="video-uploader"></span>
+                <span id="video-duration"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="options-row">
+            <!-- HTTP: connections -->
+            <span class="option-label" id="conn-label" data-i18n="label_connections">Connections:</span>
+            <select class="segment-select" id="seg-count">
+              <option value="1">1 (Single)</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+              <option value="16" selected>16 (Recommended)</option>
+              <option value="32">32</option>
+            </select>
+
+            <!-- YouTube: quality -->
+            <span class="option-label" id="quality-label" style="display:none" data-i18n="label_quality">Quality:</span>
+            <select class="format-select" id="format-select">
+              <option value="bv*+ba/b" data-i18n="opt_best_quality">Best Quality</option>
+              <option value="bv*[height&lt;=1080]+ba/b[height&lt;=1080]/bv*[height&lt;=1080]/b" data-i18n="opt_1080p">1080p (HD)</option>
+              <option value="bv*[height&lt;=720]+ba/b[height&lt;=720]/bv*[height&lt;=720]/b" data-i18n="opt_720p">720p</option>
+              <option value="bv*[height&lt;=480]+ba/b[height&lt;=480]/bv*[height&lt;=480]/b" data-i18n="opt_480p">480p</option>
+              <option value="bv*[height&lt;=360]+ba/b[height&lt;=360]/bv*[height&lt;=360]/b" data-i18n="opt_360p">360p (Low)</option>
+              <option value="mixdm:audio:original" data-i18n="opt_audio_original">Audio Only - Best Original</option>
+              <option value="mixdm:audio:mp3:320" data-i18n="opt_audio_mp3_320">MP3 320 kbps</option>
+              <option value="mixdm:audio:mp3:256" data-i18n="opt_audio_mp3_256">MP3 256 kbps</option>
+              <option value="mixdm:audio:mp3:192" data-i18n="opt_audio_mp3_192">MP3 192 kbps</option>
+            </select>
+
+            <span class="info-badge" id="file-info-badge"></span>
+            <a href="#" id="toggle-advanced-btn" style="color: var(--text-secondary); text-decoration: none; font-size: 12px; margin-left: auto; display: flex; align-items: center; gap: 4px; font-weight: 600;" data-i18n="link_advanced">⚙️ Advanced Settings</a>
+          </div>
+
+          <!-- Advanced Fields (User-Agent, Referer, Cookies) -->
+          <div id="advanced-fields" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);">
+            <div class="report-field" style="margin-bottom: 0;">
+              <label class="report-label" style="font-size: 10px;" data-i18n="label_ua">Custom User-Agent</label>
+              <input type="text" class="report-input" id="adv-user-agent" placeholder="Mozilla/5.0..." style="font-size: 11px; padding: 6px 10px;" />
+            </div>
+            <div class="report-field" style="margin-bottom: 0;">
+              <label class="report-label" style="font-size: 10px;" data-i18n="label_referer">Custom Referer</label>
+              <input type="text" class="report-input" id="adv-referer" placeholder="https://..." style="font-size: 11px; padding: 6px 10px;" />
+            </div>
+            <div class="report-field" style="margin-bottom: 0;">
+              <label class="report-label" style="font-size: 10px;" data-i18n="label_cookies">Custom Cookies</label>
+              <input type="text" class="report-input" id="adv-cookies" placeholder="key1=value1; key2=value2" style="font-size: 11px; padding: 6px 10px;" />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Card (Main Chart / Overall Performance) -->
+      <div class="dash-card main-chart-card">
+        <div class="chart-header">
+          <div class="chart-tabs">
+            <button class="chart-tab active">Overall Performance</button>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <canvas id="speedChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Bottom Row (Tasks List) -->
+      <div class="dashboard-bottom-row">
+        <!-- yt-dlp missing banner -->
+        <div class="ytdlp-banner" id="ytdlp-banner" data-i18n="banner_ytdlp_missing">
+          ⚠️ yt-dlp is not installed. YouTube/Social downloads won't work.
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all" data-i18n="filter_all">All</button>
+          <button class="filter-btn" data-filter="downloading" data-i18n="filter_downloading">Downloading</button>
+          <button class="filter-btn" data-filter="done" data-i18n="filter_completed">Completed</button>
+          <button class="filter-btn" data-filter="paused" data-i18n="filter_paused">Paused</button>
+          <div class="spacer"></div>
+          <span class="dl-count" id="dl-count">0 downloads</span>
+        </div>
+
+        <!-- Tasks List -->
+        <div class="tasks-list" id="tasks-list"></div>
+        <div class="empty-state show" id="empty-state">
+          <div class="empty-icon">📥</div>
+          <div class="empty-title" data-i18n="no_downloads">No downloads yet</div>
+          <div class="empty-sub" data-i18n="no_downloads_sub">Paste a URL above — supports YouTube, direct file links, and more</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast Area -->
+<div class="toast-area" id="toast-area"></div>
+
+<!-- Settings Overlay -->
+<div class="settings-overlay" id="settings-overlay"></div>
+
+<!-- Warning Modal Overlay -->
+<div class="modal-overlay" id="safety-modal-overlay">
+  <div class="warning-modal">
+    <div class="warning-title" data-i18n="safety_title">
+      <span>⚠️</span> แจ้งเตือนความปลอดภัย (Security Warning)
+    </div>
+    <div class="warning-message" id="safety-modal-message" data-i18n="safety_message">
+      ไฟล์นี้มีนามสกุลที่อาจเป็นอันตราย หรือดาวน์โหลดจากเว็บไซต์ภายนอกที่ไม่คุ้นเคย อาจมีไวรัสหรือมัลแวร์แฝงอยู่ คุณแน่ใจหรือไม่ว่าต้องการดาวน์โหลดต่อไป?
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="safety-btn-cancel" data-i18n="safety_cancel">ยกเลิก (Cancel)</button>
+      <button class="btn btn-danger-confirm" id="safety-btn-confirm" data-i18n="safety_confirm">ดาวน์โหลดต่อไป (Download Anyway)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Refresh URL Modal Overlay -->
+<div class="modal-overlay" id="refresh-modal-overlay">
+  <div class="report-modal">
+    <div class="report-modal-header">
+      <div class="report-modal-icon">🔄</div>
+      <div style="flex-grow: 1; text-align: left;">
+        <div class="report-modal-title" data-i18n="refresh_title">ชุบชีวิตลิงก์ดาวน์โหลด (Refresh Download URL)</div>
+        <div class="report-modal-subtitle" data-i18n="refresh_subtitle">อัปเดตลิงก์ดาวน์โหลดใหม่เพื่อดาวน์โหลดต่อจากจุดเดิม</div>
+      </div>
+    </div>
+    <div class="report-notice" style="background: var(--warn-bg); border-color: rgba(245,158,11,0.25); color: var(--warn);" data-i18n="refresh_notice">
+      ⚠️ ลิงก์ใหม่ต้องดาวน์โหลด **ไฟล์เดิมที่มีขนาดตรงกัน** เพื่อให้สามารถ Resume ต่อได้
+    </div>
+    <div class="report-field">
+      <label class="report-label" for="refresh-url-input" data-i18n="refresh_label">ลิงก์ดาวน์โหลดใหม่ (New Download URL) *</label>
+      <input type="url" class="report-input" id="refresh-url-input" placeholder="วางลิงก์ใหม่ที่นี่ (http:// หรือ https://)" data-i18n-placeholder="refresh_placeholder" required />
+    </div>
+    <div class="report-modal-actions">
+      <button class="btn btn-cancel" id="refresh-btn-cancel" data-i18n="safety_cancel">ยกเลิก (Cancel)</button>
+      <button class="btn btn-primary" id="refresh-btn-submit">
+        <span class="spinner" id="refresh-spinner"></span>
+        <span data-i18n="refresh_submit">อัปเดตลิงก์ (Update URL)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Report Modal Overlay -->
+<div class="modal-overlay" id="report-modal-overlay">
+  <div class="report-modal">
+    <!-- Header -->
+    <div class="report-modal-header">
+      <div class="report-modal-icon">📨</div>
+      <div>
+        <div class="report-modal-title" data-i18n="report_title">รายงานปัญหา (Report an Issue)</div>
+        <div class="report-modal-subtitle" data-i18n="report_subtitle">ข้อมูลที่กรอกจะถูกเก็บไว้อย่างปลอดภัย — ไม่รวม email, token หรือข้อมูลส่วนตัว</div>
+      </div>
+    </div>
+
+    <!-- Form Area -->
+    <div id="report-form-area">
+      <!-- Type Tabs -->
+      <div class="report-type-tabs">
+        <button class="report-type-tab active" id="report-tab-bug" data-type="bug" data-i18n="report_tab_bug">🐛 Bug Report</button>
+        <button class="report-type-tab" id="report-tab-crash" data-type="crash" data-i18n="report_tab_crash">💥 Crash Report</button>
+        <button class="report-type-tab" id="report-tab-security" data-type="security" data-i18n="report_tab_security">🔒 Security Issue</button>
+      </div>
+
+      <div class="report-notice" data-i18n="report_notice">
+        🔒 ข้อมูลที่ส่งจะถูก sanitize อัตโนมัติ — ไม่เก็บสิ่งที่เป็น email, token, หรือข้อมูลส่วนตัวใดๆ
+      </div>
+
+      <!-- Sender Contact Fields -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="report-field" style="margin-bottom: 0;">
+          <label class="report-label" for="report-sender-name" data-i18n="report_field_name">Your Name *</label>
+          <input type="text" class="report-input" id="report-sender-name" placeholder="Enter your name" data-i18n-placeholder="placeholder_sender_name" required />
+        </div>
+        <div class="report-field" style="margin-bottom: 0;">
+          <label class="report-label" for="report-sender-email" data-i18n="report_field_email">Your Email *</label>
+          <input type="email" class="report-input" id="report-sender-email" placeholder="Enter your email" data-i18n-placeholder="placeholder_sender_email" required />
+        </div>
+      </div>
+
+      <!-- Bug fields -->
+      <div id="fields-bug">
+        <div class="report-field">
+          <label class="report-label" for="report-title" data-i18n="report_field_title">หัวข้อปัญหา (Title) *</label>
+          <input type="text" class="report-input" id="report-title" placeholder="สรุปปัญหาสั้นๆ" data-i18n-placeholder="placeholder_title" maxlength="200" />
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-description" data-i18n="report_field_desc">รายละเอียด (Description) *</label>
+          <textarea class="report-textarea" id="report-description" placeholder="อธิบายปัญหาที่พบ" data-i18n-placeholder="placeholder_desc" rows="3"></textarea>
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-steps" data-i18n="report_field_steps">ขั้นตอนที่ทำให้เกิดปัญหา (Steps to Reproduce)</label>
+          <textarea class="report-textarea" id="report-steps" placeholder="1. เปิดแอป...&#10;2. กดปุ่ม...&#10;3. เกิดปัญหา" data-i18n-placeholder="placeholder_steps" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- Crash fields -->
+      <div id="fields-crash" style="display:none">
+        <div class="report-field">
+          <label class="report-label" for="report-error-msg" data-i18n="report_field_err">ข้อความ Error (Error Message) *</label>
+          <input type="text" class="report-input" id="report-error-msg" placeholder="เช่น Cannot read properties of null" data-i18n-placeholder="placeholder_err" maxlength="300" />
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-stack" data-i18n="report_field_stack">ส่วนที่ผิดพลาด (Stack Trace — ไม่จำเป็นต้องเป็น)</label>
+          <textarea class="report-textarea" id="report-stack" placeholder="วาง stack trace ไว้ที่นี่ (ถ้ามี)" data-i18n-placeholder="placeholder_stack" rows="4"></textarea>
+        </div>
+      </div>
+
+      <!-- Security fields -->
+      <div id="fields-security" style="display:none">
+        <div class="report-field">
+          <label class="report-label" for="report-sec-title" data-i18n="report_field_sec_title">ปัญหาความปลอดภัย (Security Issue Title) *</label>
+          <input type="text" class="report-input" id="report-sec-title" placeholder="สรุปปัญหาสั้นๆ" data-i18n-placeholder="placeholder_sec_title" maxlength="200" />
+        </div>
+        <div class="report-field">
+          <label class="report-label" for="report-sec-detail" data-i18n="report_field_sec_detail">รายละเอียด (Detail) *</label>
+          <textarea class="report-textarea" id="report-sec-detail" placeholder="อธิบายปัญหาความปลอดภัยที่พบ" data-i18n-placeholder="placeholder_sec_detail" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="report-modal-actions">
+        <button class="btn btn-cancel" id="report-btn-cancel" data-i18n="safety_cancel">ยกเลิก</button>
+        <button class="btn btn-primary" id="report-btn-submit">
+          <span class="spinner" id="report-spinner"></span>
+          <span data-i18n="report_submit">ส่งรายงาน (Submit)</span>
+        </button>
+      </div>
+    </div><!-- /#report-form-area -->
+
+    <!-- Success state -->
+    <div class="report-success" id="report-success">
+      <div class="report-success-icon">✅</div>
+      <div class="report-success-title" data-i18n="report_success_title">ส่งรายงานเรียบร้อยแล้ว!</div>
+      <div class="report-success-desc" data-i18n="report_success_desc">ขอบคุณที่ช่วยปรับปรุง MIXDM ให้ดียิ่งขึ้น!</div>
+      <button class="btn btn-primary" id="report-success-close" style="margin-top:8px;" data-i18n="report_close">ปิดหน้าต่าง (Close)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Developer Panel Modal Overlay -->
+<div class="modal-overlay" id="dev-modal-overlay">
+  <div class="report-modal" style="max-width: 800px; width: 90%;">
+    <!-- Header -->
+    <div class="report-modal-header" style="border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px;">
+      <div class="report-modal-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-2);">🛠️</div>
+      <div style="flex-grow: 1; text-align: left;">
+        <div class="report-modal-title" data-i18n="dev_title">Developer Dashboard (แดชบอร์ดผู้พัฒนา)</div>
+        <div class="report-modal-subtitle" data-i18n="dev_subtitle">ตรวจสอบรายงานความผิดพลาด บั๊ก และประเด็นความปลอดภัย</div>
+      </div>
+      <button class="btn-settings" id="dev-btn-clear" style="background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.2); color: var(--danger); font-size: 12px; padding: 6px 12px;">
+        🗑️ <span data-i18n="dev_clear">Clear All</span>
+      </button>
+    </div>
+
+    <!-- Filter/Tabs -->
+    <div class="report-type-tabs" style="margin-bottom: 16px;">
+      <button class="report-type-tab active" id="dev-tab-all" data-type="all">📋 <span data-i18n="dev_tab_all">All</span> (<span id="dev-count-all">0</span>)</button>
+      <button class="report-type-tab" id="dev-tab-bug" data-type="bug">🐛 <span data-i18n="dev_tab_bugs">Bugs</span> (<span id="dev-count-bug">0</span>)</button>
+      <button class="report-type-tab" id="dev-tab-crash" data-type="crash">💥 <span data-i18n="dev_tab_crashes">Crashes</span> (<span id="dev-count-crash">0</span>)</button>
+      <button class="report-type-tab" id="dev-tab-security" data-type="security">🔒 <span data-i18n="dev_tab_security">Security</span> (<span id="dev-count-security">0</span>)</button>
+    </div>
+
+    <!-- Reports Content List -->
+    <div id="dev-reports-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding-right: 4px;">
+      <!-- Empty State -->
+      <div id="dev-reports-empty" style="text-align: center; padding: 40px 20px; color: var(--text-dim);">
+        <div style="font-size: 40px; margin-bottom: 12px;">🎉</div>
+        <div style="font-weight: 600; color: var(--text-secondary);" data-i18n="dev_empty">No reports found</div>
+        <div style="font-size: 12px; margin-top: 4px;" data-i18n="dev_empty_sub">แอปพลิเคชันทำงานปกติ ไม่มีรายงานปัญหาในขณะนี้</div>
+      </div>
+      
+      <!-- List Area -->
+      <div id="dev-reports-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+
+    <div class="report-modal-actions" style="border-top: 1px solid var(--border); padding-top: 16px;">
+      <button class="btn btn-cancel" id="dev-btn-close" data-i18n="dev_close">ปิดหน้าต่าง (Close)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal Overlay -->
+<div class="modal-overlay" id="profile-modal-overlay">
+  <div class="profile-modal">
+    <!-- Header -->
+    <div class="profile-modal-header">
+      <div class="profile-modal-header-info">
+        <h2 class="profile-modal-title" data-i18n="profile_title">Profile Settings</h2>
+        <p class="profile-modal-subtitle" data-i18n="profile_subtitle">Update your profile details, bio, and subscription plan</p>
+      </div>
+      <button class="profile-modal-close" id="profile-btn-close">✕</button>
+    </div>
+
+    <!-- Body / Form -->
+    <div class="profile-modal-body">
+      <!-- Avatar Section -->
+      <div class="profile-avatar-upload-section">
+        <div class="profile-avatar-preview-wrap">
+          <div id="profile-avatar-placeholder" class="profile-avatar-placeholder">👤</div>
+          <img id="profile-avatar-preview" src="" alt="Avatar" style="display: none;" />
+          <div class="profile-avatar-overlay-trigger" id="profile-avatar-overlay-trigger">
+            <span>📷</span>
+          </div>
+        </div>
+        <input type="file" id="profile-avatar-file-input" accept="image/*" style="display: none;" />
+        <button class="btn btn-ghost" id="btn-upload-avatar-trigger" data-i18n="profile_btn_change_avatar">Upload Avatar</button>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="profile-form-grid">
+        <div class="report-field">
+          <label class="report-label" for="profile-name-input" data-i18n="profile_field_name">Display Name *</label>
+          <input type="text" class="report-input" id="profile-name-input" placeholder="Display Name" required />
+        </div>
+
+        <div class="report-field">
+          <label class="report-label" for="profile-bio-input" data-i18n="profile_field_bio">Biography / Info</label>
+          <textarea class="report-textarea" id="profile-bio-input" placeholder="Tell us about yourself..." rows="3"></textarea>
+        </div>
+
+
+
+        <div class="report-field">
+          <label class="report-label" for="profile-pass-input" data-i18n="profile_field_pass">New Password (leave empty to keep current)</label>
+          <input type="password" class="report-input" id="profile-pass-input" placeholder="New Password" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="profile-modal-actions">
+      <button class="btn btn-cancel" id="profile-btn-cancel" data-i18n="safety_cancel">Cancel</button>
+      <button class="btn btn-primary" id="profile-btn-save">
+        <span class="spinner" id="profile-save-spinner"></span>
+        <span data-i18n="profile_btn_save">Save Profile Settings</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Files Explorer Modal Overlay -->
+<div class="modal-overlay" id="files-modal-overlay">
+  <div class="files-modal">
+    <!-- Header -->
+    <div class="files-modal-header">
+      <div class="files-modal-header-info">
+        <h2 class="files-modal-title" data-i18n="files_title">Downloaded Files</h2>
+        <p class="files-modal-subtitle" data-i18n="files_subtitle">Manage files inside your downloads directory</p>
+      </div>
+      <button class="files-modal-close" id="files-btn-close">✕</button>
+    </div>
+
+    <!-- Search Bar inside Modal -->
+    <div class="files-modal-search-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="files-search-input" placeholder="Search files..." data-i18n-placeholder="files_search" autocomplete="off" spellcheck="false" />
+    </div>
+
+    <!-- Body / File List -->
+    <div class="files-modal-body">
+      <!-- File list viewport -->
+      <div class="files-list-viewport" id="files-list-viewport">
+        <!-- Rendered items go here -->
+      </div>
+      
+      <!-- Empty state inside Files Explorer -->
+      <div class="files-empty-state" id="files-empty-state">
+        <div class="files-empty-icon">📁</div>
+        <div class="files-empty-title" data-i18n="files_empty">No downloaded files found</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing & Subscription Modal Overlay -->
+<div class="modal-overlay" id="pricing-modal-overlay">
+  <div class="pricing-modal">
+    <!-- Header -->
+    <div class="pricing-modal-header">
+      <div class="pricing-modal-header-info">
+        <h2 class="pricing-modal-title" data-i18n="pricing_title">Upgrade to Premium</h2>
+        <p class="pricing-modal-subtitle" data-i18n="pricing_subtitle">Choose the perfect plan to boost your download speeds and unlock Pro features</p>
+      </div>
+      <button class="pricing-modal-close" id="pricing-btn-close">✕</button>
+    </div>
+
+    <div class="pricing-overview">
+      <div class="pricing-overview-main">
+        <div class="pricing-overview-kicker" data-i18n="pricing_overview_current">Current subscription</div>
+        <div class="pricing-overview-plan" id="pricing-current-plan" data-i18n="pricing_free_title">Free Plan</div>
+        <div class="pricing-overview-note" data-i18n="pricing_overview_note">Your download limits are based on the active plan for this account.</div>
+      </div>
+      <div class="pricing-overview-stats">
+        <div class="pricing-overview-stat">
+          <span data-i18n="pricing_overview_speed">Speed</span>
+          <strong id="pricing-current-speed" data-i18n="pricing_compare_speed_free">Up to 50 MB/s</strong>
+        </div>
+        <div class="pricing-overview-stat">
+          <span data-i18n="pricing_overview_connections">Connections</span>
+          <strong id="pricing-current-connections">8</strong>
+        </div>
+        <div class="pricing-overview-stat">
+          <span data-i18n="pricing_overview_status">Status</span>
+          <strong id="pricing-current-status" data-i18n="pricing_btn_current">Current Plan</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Grid -->
+    <div class="pricing-grid">
+      <!-- Free Plan Card -->
+      <div class="pricing-card" id="pricing-card-free">
+        <div class="pricing-card-header">
+          <div class="pricing-card-badge">Free</div>
+          <h3 class="pricing-card-title" data-i18n="pricing_free_title">Free Plan</h3>
+          <p class="pricing-card-desc" data-i18n="pricing_free_desc">Standard speeds for casual downloading</p>
+        </div>
+        <div class="pricing-card-price-wrap">
+          <span class="pricing-card-price" data-i18n="pricing_free_price">$0</span>
+          <span class="pricing-card-period" data-i18n="pricing_per_month">/ mo</span>
+        </div>
+        <ul class="pricing-card-features">
+          <li class="disabled"><span>✕</span> <span data-i18n="pricing_feature_speed_limit">Speed Limit (Max 50 MB/s)</span></li>
+          <li class="disabled"><span>✕</span> <span data-i18n="pricing_feature_conn_limit">Max 8 Connections per task</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_standard">Standard HTTP/HTTPS downloads</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_sound">Chime sound notifications</span></li>
+          <li class="disabled"><span>✕</span> <span data-i18n="pricing_feature_cookies">Cookies sharing (YouTube etc.)</span></li>
+        </ul>
+        <button class="pricing-card-btn btn-current-plan" id="btn-checkout-free" disabled>
+          <span data-i18n="pricing_btn_current">Current Plan</span>
+        </button>
+      </div>
+
+      <!-- Pro Plan Card -->
+      <div class="pricing-card popular" id="pricing-card-pro">
+        <div class="pricing-card-header">
+          <div class="pricing-card-badge pro">👑 Pro</div>
+          <h3 class="pricing-card-title" data-i18n="pricing_pro_title">Pro Plan</h3>
+          <p class="pricing-card-desc" data-i18n="pricing_pro_desc">Max speed and advanced features for downloaders</p>
+        </div>
+        <div class="pricing-card-price-wrap">
+          <span class="pricing-card-price" data-i18n="pricing_pro_price">$4.99</span>
+          <span class="pricing-card-period" data-i18n="pricing_per_month">/ mo</span>
+        </div>
+        <ul class="pricing-card-features">
+          <li class="highlight"><span>✓</span> <span data-i18n="pricing_feature_speed_unlimit">Unlimited Download Speed</span></li>
+          <li class="highlight"><span>✓</span> <span data-i18n="pricing_feature_conn_unlimit">Up to 32 Connections per task</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_standard">Standard HTTP/HTTPS downloads</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_advanced">Advanced Segment optimization</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_cookies">Cookies sharing (YouTube etc.)</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_themes">Custom App UI themes</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_support">Priority 24/7 support</span></li>
+        </ul>
+        <button class="pricing-card-btn btn-pro-plan" id="btn-checkout-pro">
+          <span data-i18n="pricing_btn_select">Select Plan</span>
+        </button>
+      </div>
+
+      <!-- Lifetime Plan Card -->
+      <div class="pricing-card" id="pricing-card-lifetime">
+        <div class="pricing-card-header">
+          <div class="pricing-card-badge lifetime">💎 Lifetime</div>
+          <h3 class="pricing-card-title" data-i18n="pricing_life_title">Lifetime Plan</h3>
+          <p class="pricing-card-desc" data-i18n="pricing_life_desc">Pay once, unlock unlimited downloading forever</p>
+        </div>
+        <div class="pricing-card-price-wrap">
+          <span class="pricing-card-price" data-i18n="pricing_life_price">$49.99</span>
+          <span class="pricing-card-period" data-i18n="pricing_one_time">One-time</span>
+        </div>
+        <ul class="pricing-card-features">
+          <li class="highlight"><span>✓</span> <span data-i18n="pricing_feature_speed_unlimit">Unlimited Download Speed</span></li>
+          <li class="highlight"><span>✓</span> <span data-i18n="pricing_feature_conn_unlimit">Up to 32 Connections per task</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_standard">Standard HTTP/HTTPS downloads</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_advanced">Advanced Segment optimization</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_cookies">Cookies sharing (YouTube etc.)</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_themes">Custom App UI themes</span></li>
+          <li><span>✓</span> <span data-i18n="pricing_feature_support">Priority 24/7 support</span></li>
+          <li class="highlight"><span>✓</span> <span data-i18n="pricing_feature_early">Early access to beta versions</span></li>
+        </ul>
+        <button class="pricing-card-btn btn-lifetime-plan" id="btn-checkout-lifetime">
+          <span data-i18n="pricing_btn_select">Select Plan</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Settings Panel -->
+<div class="settings-panel" id="settings-panel" role="dialog" aria-label="Settings">
+  <div class="settings-header">
+    <div class="settings-title">
+      <div class="settings-title-icon">⚙️</div>
+      <span data-i18n="btn_settings">Settings</span>
+    </div>
+    <button class="btn-close-settings" id="btn-close-settings" title="Close" data-i18n-title="report_close">✕</button>
+  </div>
+
+  <div class="settings-body">
+
+    <!-- Download Section -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_download">Download</div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_default_conn">Default Connections</div>
+          <div class="settings-row-desc" data-i18n="s_default_conn_desc">Number of parallel threads for HTTP downloads.<br>More connections = faster, but depends on server support.</div>
+        </div>
+        <select class="settings-select" id="s-default-segments">
+          <option value="1">1 — Single thread</option>
+          <option value="2">2 connections</option>
+          <option value="4">4 connections</option>
+          <option value="8">8 connections</option>
+          <option value="16">16 (Default)</option>
+          <option value="32">32 connections</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Max Concurrent Downloads</div>
+          <div class="settings-row-desc">How many download tasks can run at the same time. Extra tasks wait in queue.</div>
+        </div>
+        <select class="settings-select" id="s-max-concurrent-downloads">
+          <option value="1">1 download</option>
+          <option value="2">2 downloads</option>
+          <option value="3">3 downloads</option>
+          <option value="4">4 downloads</option>
+          <option value="5">5 downloads</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Smart Retry</div>
+          <div class="settings-row-desc">Automatically retry temporary network/server failures before marking a download as failed.</div>
+        </div>
+        <label class="toggle" for="s-smart-retry-enabled">
+          <input type="checkbox" id="s-smart-retry-enabled" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Retry Attempts</div>
+          <div class="settings-row-desc">Maximum automatic retry attempts per task.</div>
+        </div>
+        <div class="settings-number-wrap">
+          <input type="number" class="settings-number" id="s-smart-retry-attempts" min="0" max="10" step="1" value="3" />
+          <span class="settings-unit">tries</span>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_save_loc">Save Location</div>
+          <div class="settings-row-desc" data-i18n="s_save_loc_desc">All downloaded files are saved here automatically.</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; width:100%; max-width:260px;">
+          <div class="settings-dir-wrap" id="s-dir-wrap-container" title="Click to edit path manually" style="flex:1; min-width:0; cursor:pointer;">
+            <span class="settings-dir-path" id="s-downloads-dir">Loading...</span>
+            <input type="text" id="s-downloads-dir-input" class="settings-input" style="display:none; font-family:'JetBrains Mono',monospace; font-size:11px; width:100%; background:transparent; border:none; color:var(--text-primary); outline:none; padding:0;" />
+          </div>
+          <button class="btn-open-dir" id="s-browse-folder-btn" title="Browse folder" style="display:none; padding: 4px 8px;" data-i18n="s_browse">🔍 Browse</button>
+          <button class="btn-open-dir" id="s-open-folder-btn" title="Open folder" data-i18n="s_open">📂 Open</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speed Limiter -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_speed">Speed Limiter</div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Speed Mode</div>
+          <div class="settings-row-desc">Choose how aggressive downloads should be before custom limits and quota rules are applied.</div>
+        </div>
+        <div class="speed-mode-row" id="s-speed-mode-row">
+          <button type="button" class="speed-mode-btn" data-speed-mode="full" aria-pressed="false">Full</button>
+          <button type="button" class="speed-mode-btn" data-speed-mode="balanced" aria-pressed="false">Balanced</button>
+          <button type="button" class="speed-mode-btn" data-speed-mode="quiet" aria-pressed="false">Quiet</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_speed_limit">Enable Speed Limit</div>
+          <div class="settings-row-desc" data-i18n="s_speed_limit_desc">Cap download speed to prevent saturating your connection.</div>
+        </div>
+        <label class="toggle" for="s-speed-limit-enabled">
+          <input type="checkbox" id="s-speed-limit-enabled" />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_max_speed">Max Speed</div>
+          <div class="settings-row-desc" data-i18n="s_max_speed_desc">Maximum download bandwidth per download task.</div>
+        </div>
+        <div class="settings-number-wrap">
+          <input type="number" class="settings-number" id="s-speed-limit-value" min="128" max="1048576" step="128" value="51200" disabled />
+          <span class="settings-unit">KB/s</span>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">High-Speed Quota</div>
+          <div class="settings-row-desc" id="s-quota-desc">Loading quota status...</div>
+        </div>
+        <div class="quota-status-card" id="s-quota-card">
+          <div class="quota-status-top">
+            <span class="quota-plan" id="s-quota-plan">Free</span>
+            <span class="quota-reset">Resets daily</span>
+          </div>
+          <div class="quota-meter">
+            <div class="quota-meter-fill" id="s-quota-fill"></div>
+          </div>
+          <div class="quota-status-bottom">
+            <span id="s-quota-remaining">-</span>
+            <span id="s-quota-limit">50 MB/s after quota</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Speed Presets</div>
+          <div class="settings-row-desc">Quick caps for custom max speed. Speed Mode still applies as the overall behavior profile.</div>
+        </div>
+        <div class="speed-preset-row">
+          <button type="button" class="speed-preset-btn" data-speed-kbps="5120" aria-pressed="false">5 MB/s</button>
+          <button type="button" class="speed-preset-btn" data-speed-kbps="25600" aria-pressed="false">25 MB/s</button>
+          <button type="button" class="speed-preset-btn" data-speed-kbps="51200" aria-pressed="false">50 MB/s</button>
+          <button type="button" class="speed-preset-btn" data-speed-kbps="102400" aria-pressed="false">100 MB/s</button>
+          <button type="button" class="speed-preset-btn" data-speed-kbps="0" aria-pressed="false">Full</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Browser Cookies -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_cookies">Browser Cookies (yt-dlp)</div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_share_cookies">Share Browser Cookies</div>
+          <div class="settings-row-desc" data-i18n="s_share_cookies_desc">Allow yt-dlp to read cookies from your browser to download videos requiring login.</div>
+        </div>
+        <label class="toggle" for="s-cookies-enabled">
+          <input type="checkbox" id="s-cookies-enabled" />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_select_browser">Select Browser</div>
+          <div class="settings-row-desc" data-i18n="s_select_browser_desc">The browser you logged in with (Chrome, Edge, Firefox, Brave).</div>
+        </div>
+        <select class="settings-select" id="s-cookies-browser">
+          <option value="chrome">Chrome</option>
+          <option value="edge">Edge</option>
+          <option value="firefox">Firefox</option>
+          <option value="brave">Brave</option>
+          <option value="opera">Opera</option>
+          <option value="vivaldi">Vivaldi</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Interface -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_interface">Interface</div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_auto_analyze">Auto-Analyze on Paste</div>
+          <div class="settings-row-desc" data-i18n="s_auto_analyze_desc">Automatically analyze URL when you paste it into the input field.</div>
+        </div>
+        <label class="toggle" for="s-auto-analyze">
+          <input type="checkbox" id="s-auto-analyze" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_clear_url">Clear URL after Start</div>
+          <div class="settings-row-desc" data-i18n="s_clear_url_desc">Clear the URL input field after a download is started.</div>
+        </div>
+        <label class="toggle" for="s-clear-after-start">
+          <input type="checkbox" id="s-clear-after-start" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_clip_monitor">Clipboard Monitor</div>
+          <div class="settings-row-desc" data-i18n="s_clip_monitor_desc">Automatically detect download links in your clipboard (Windows only).</div>
+        </div>
+        <label class="toggle" for="s-clipboard-monitor">
+          <input type="checkbox" id="s-clipboard-monitor" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_sys_notifications">System Notifications</div>
+          <div class="settings-row-desc" data-i18n="s_sys_notifications_desc">Show desktop notifications for clipboard links when minimized.</div>
+        </div>
+        <label class="toggle" for="s-clipboard-notifications">
+          <input type="checkbox" id="s-clipboard-notifications" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Mini Download HUD</div>
+          <div class="settings-row-desc">Show a small always-on-top download status card instead of opening the main window.</div>
+        </div>
+        <label class="toggle" for="s-show-mini-hud">
+          <input type="checkbox" id="s-show-mini-hud" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_completion_sound">Play Completion Sound</div>
+          <div class="settings-row-desc" data-i18n="s_completion_sound_desc">Play a notification sound when a download completes.</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn-open-dir" id="btn-test-chime" title="Test Chime Sound" style="padding: 4px 8px; border-color: var(--border); color: var(--text-secondary); background: rgba(255,255,255,0.03);" data-i18n="s_test_chime">🔊 Test</button>
+          <label class="toggle" for="s-completion-sound">
+            <input type="checkbox" id="s-completion-sound" />
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_auto_launch">Launch on Startup</div>
+          <div class="settings-row-desc" data-i18n="s_auto_launch_desc">Automatically launch MIXDM when Windows starts.</div>
+        </div>
+        <label class="toggle" for="s-auto-launch">
+          <input type="checkbox" id="s-auto-launch" />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_theme">Theme Settings</div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_theme">Select Theme</div>
+          <div class="settings-row-desc" data-i18n="s_theme_desc">Choose between default color scheme and mascot shushutan theme.</div>
+        </div>
+        <select class="settings-select" id="s-theme">
+          <option value="default" data-i18n="s_theme_default">Default Theme</option>
+          <option value="shushutan" data-i18n="s_theme_shushutan">Shushutan Theme</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Language -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_language">Language Settings</div>
+
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label" data-i18n="s_lang">Select Language</div>
+          <div class="settings-row-desc" data-i18n="s_lang_desc">Choose the language for the user interface.</div>
+        </div>
+        <select class="settings-select" id="s-language">
+          <option value="en">English</option>
+          <option value="th">ไทย (Thai)</option>
+          <option value="ja">日本語 (Japanese)</option>
+          <option value="zh">中文 (Chinese)</option>
+          <option value="es">Español (Spanish)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div>
+      <div class="settings-section-label" data-i18n="s_section_about">About</div>
+      <div class="settings-row" style="border:none; padding:0;">
+        <div class="settings-about-card">
+          <div class="settings-about-title">
+            <span>MIXDM</span>
+            <span class="settings-version" id="s-app-version">v1.0.0</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-dim); line-height:1.6;">
+            <span data-i18n="about_desc1">High-performance download manager</span><br>
+            <span data-i18n="about_desc2">Supports HTTP segmented · yt-dlp engine</span><br>
+            <span id="s-ytdlp-status" style="color:var(--text-dim);">Checking yt-dlp...</span><br>
+            <span id="s-ffmpeg-status" style="color:var(--text-dim);">Checking ffmpeg...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.settings-body -->
+
+  <div class="settings-footer" style="display:flex; flex-direction:column; gap:8px;">
+    <button class="btn-save-settings" id="btn-save-settings" data-i18n="s_save_btn">💾 Save Settings</button>
+    <button class="btn-cancel" id="btn-reset-settings" style="width:100%; padding:10px; border-radius:var(--radius-sm); font-size:12px; font-weight:700; cursor:pointer; border:1px solid rgba(244,63,94,0.25); background:rgba(244,63,94,0.05); color:var(--danger); font-family:'Outfit',sans-serif; text-transform:uppercase; letter-spacing:0.5px;" data-i18n="s_reset_btn">🗑️ Reset to Defaults</button>
+    <div class="save-status" id="save-status" data-i18n="s_saved_success">✓ Settings saved!</div>
+  </div>
+<!-- Clipboard Toast Notification -->
+<div class="clip-toast" id="clip-toast">
+  <div class="clip-toast-header">
+    <span class="clip-toast-icon">📋</span>
+    <span class="clip-toast-title">Link Detected in Clipboard</span>
+    <button class="clip-toast-close" id="clip-toast-close" title="Dismiss">×</button>
+  </div>
+  <div class="clip-toast-body">
+    <div class="clip-toast-url" id="clip-toast-url"></div>
+  </div>
+  <div class="clip-toast-actions">
+    <button class="clip-toast-btn clip-toast-btn-secondary" id="clip-toast-btn-dismiss">Dismiss</button>
+    <button class="clip-toast-btn clip-toast-btn-primary" id="clip-toast-btn-analyze">Analyze</button>
+  </div>
+  <div class="clip-toast-progress-wrap">
+    <div class="clip-toast-progress" id="clip-toast-progress"></div>
+  </div>
+</div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/safety.js"></script>
+  <script src="js/video-formats.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/downloads.js"></script>
+</body>
+</html>
