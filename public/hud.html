@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIXDM Mini Download HUD</title>
+  <link rel="stylesheet" href="css/hud.css" />
+</head>
+<body>
+  <main class="hud-card" id="hud-card">
+    <div class="hud-icon" id="hud-icon">
+      <span id="hud-icon-symbol">↓</span>
+    </div>
+
+    <section class="hud-content">
+      <div class="hud-header">
+        <div class="hud-copy">
+          <div class="hud-title" id="hud-title">Downloading</div>
+          <div class="hud-subtitle" id="hud-subtitle">Preparing...</div>
+        </div>
+        <div class="hud-actions" id="hud-actions">
+          <button class="hud-action" id="hud-primary" title="Pause or resume">Pause</button>
+          <button class="hud-action danger" id="hud-cancel" title="Cancel downloads">Cancel</button>
+          <button class="hud-action icon" id="hud-open-main" title="Open MIXDM">Open</button>
+        </div>
+      </div>
+
+      <div class="hud-progress-track">
+        <div class="hud-progress-fill" id="hud-progress-fill"></div>
+      </div>
+
+      <div class="hud-footer">
+        <span id="hud-size">-</span>
+        <span id="hud-speed">-</span>
+        <span class="hud-badge" id="hud-badge"></span>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/hud.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+/* ── Reset & Tokens ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:       #22242a;
+  --bg-surface:    #2a2b31;
+  --bg-card:       #32343b;
+  --sidebar-bg:    #2d2f36;
+  --bg-hover:      #3b3d45;
+  --border:        rgba(255,255,255,0.08);
+  --border-glow:   rgba(124, 58, 237, 0.25);
+  --text-primary:  #ffffff;
+  --text-secondary:#c1c2c5;
+  --text-dim:      #8f9196;
+  --accent:        #6b4ce6; /* Purple from mockup */
+  --accent-glow:   rgba(107, 76, 230, 0.35);
+  --accent-2:      #8b5cf6;
+  --yt-red:        #ef4444;
+  --yt-red-bg:     rgba(239,68,68,0.08);
+  --yt-red-glow:   rgba(239,68,68,0.25);
+  --success:       #10b981;
+  --success-bg:    rgba(16,185,129,0.08);
+  --warn:          #f59e0b;
+  --warn-bg:       rgba(245,158,11,0.08);
+  --danger:        #f43f5e;
+  --danger-bg:     rgba(244,63,94,0.08);
+  --radius:        14px;
+  --radius-sm:     10px;
+  --shadow:        0 12px 40px rgba(0,0,0,0.5);
+  --bg-glow-1:     rgba(99, 102, 241, 0.05);
+  --bg-glow-2:     rgba(139, 92, 246, 0.04);
+}
+
+.theme-shushutan {
+  --bg-base:       #0a0f16;
+  --bg-surface:    #121924;
+  --bg-card:       #18212f;
+  --bg-hover:      #243044;
+  --border:        rgba(255,255,255,0.06);
+  --border-glow:   rgba(58, 204, 230, 0.25);
+  --text-primary:  #f0f5fa;
+  --text-secondary:#a0b2c6;
+  --text-dim:      #556880;
+  --accent:        #3acce6; /* Vibrant Mascot Turquoise */
+  --accent-glow:   rgba(58, 204, 230, 0.35);
+  --accent-2:      #ff6992; /* Mascot Pastel Pink */
+  --yt-red:        #ff6992;
+  --yt-red-bg:     rgba(255,105,146,0.08);
+  --yt-red-glow:   rgba(255,105,146,0.25);
+  --success:       #0fa87b; /* Mascot Emerald Green Eyes */
+  --success-bg:    rgba(15,168,123,0.08);
+  --warn:          #ffbe2e; /* Mascot Gold Heart Emblem */
+  --warn-bg:       rgba(255,190,46,0.08);
+  --danger:        #ff5252;
+  --danger-bg:     rgba(255,82,82,0.08);
+  --bg-glow-1:     rgba(58, 204, 230, 0.05);
+  --bg-glow-2:     rgba(255, 105, 146, 0.04);
+}

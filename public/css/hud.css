@@ -1,0 +1,208 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  font-family: "Segoe UI", "Inter", sans-serif;
+  color: #f8fafc;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-card {
+  width: 332px;
+  height: 112px;
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 24px;
+  border: 0;
+  background:
+    radial-gradient(circle at 28% 100%, rgba(37, 99, 235, 0.16), transparent 44%),
+    linear-gradient(135deg, rgba(14, 18, 30, 0.98), rgba(3, 5, 12, 0.98));
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.hud-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(29, 78, 216, 0.24);
+  color: #60a5fa;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.hud-card.done .hud-icon {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.18);
+}
+
+.hud-card.error .hud-icon {
+  color: #fb7185;
+  background: rgba(244, 63, 94, 0.16);
+}
+
+.hud-card.paused .hud-icon {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.hud-content {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hud-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.hud-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.hud-title {
+  width: 100%;
+  overflow: hidden;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.12;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hud-subtitle {
+  width: 100%;
+  overflow: hidden;
+  margin-top: 4px;
+  color: rgba(226, 232, 240, 0.62);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hud-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.hud-action {
+  height: 25px;
+  min-width: 39px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hud-action:hover {
+  background: rgba(59, 130, 246, 0.28);
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+.hud-action.danger {
+  color: #fecdd3;
+}
+
+.hud-card.done .hud-action.danger {
+  display: none;
+}
+
+.hud-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hud-progress-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  transition: width 0.25s ease;
+}
+
+.hud-card.done .hud-progress-fill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.hud-card.error .hud-progress-fill {
+  background: linear-gradient(90deg, #e11d48, #fb7185);
+}
+
+.hud-card.paused .hud-progress-fill {
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.hud-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: rgba(226, 232, 240, 0.58);
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.hud-footer span {
+  white-space: nowrap;
+}
+
+#hud-size {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#hud-speed {
+  flex: 0 0 auto;
+}
+
+.hud-badge {
+  display: none;
+  max-width: 88px;
+  overflow: hidden;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: #bfdbfe;
+  background: rgba(37, 99, 235, 0.16);
+  text-overflow: ellipsis;
+}
+
+.hud-badge.show {
+  display: inline-flex;
+}

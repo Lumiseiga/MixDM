@@ -58,6 +58,10 @@ db.exec(`
     redeemed_at   TEXT,
     expires_at    TEXT,
     machine_id    TEXT,
+    revoked_reason TEXT,
+    revoked_at    TEXT,
+    revoked_by    TEXT,
+    suspicious    INTEGER NOT NULL DEFAULT 0,
     license_signature TEXT
   );
 
@@ -101,6 +105,10 @@ try { db.exec("ALTER TABLE users ADD COLUMN subscription_expires_at TEXT"); } ca
 try { db.exec("ALTER TABLE users ADD COLUMN subscription_machine_id TEXT"); } catch (_) {}
 try { db.exec("ALTER TABLE users ADD COLUMN subscription_signature TEXT"); } catch (_) {}
 try { db.exec("ALTER TABLE license_keys ADD COLUMN machine_id TEXT"); } catch (_) {}
+try { db.exec("ALTER TABLE license_keys ADD COLUMN revoked_reason TEXT"); } catch (_) {}
+try { db.exec("ALTER TABLE license_keys ADD COLUMN revoked_at TEXT"); } catch (_) {}
+try { db.exec("ALTER TABLE license_keys ADD COLUMN revoked_by TEXT"); } catch (_) {}
+try { db.exec("ALTER TABLE license_keys ADD COLUMN suspicious INTEGER NOT NULL DEFAULT 0"); } catch (_) {}
 try { db.exec("ALTER TABLE license_keys ADD COLUMN license_signature TEXT"); } catch (_) {}
 try { db.exec("ALTER TABLE reports ADD COLUMN sender_name TEXT DEFAULT ''"); } catch (_) {}
 try { db.exec("ALTER TABLE reports ADD COLUMN sender_email TEXT DEFAULT ''"); } catch (_) {}

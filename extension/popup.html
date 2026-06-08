@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MIXDM Connector</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="popup">
+    <header class="topbar">
+      <div>
+        <div class="brand">MIXDM</div>
+        <div class="status" id="status">Checking app...</div>
+      </div>
+      <button class="icon-button" id="refresh" title="Refresh status" type="button">R</button>
+    </header>
+
+    <section class="current">
+      <div class="label">Current tab</div>
+      <div class="title" id="tab-title">Loading...</div>
+      <div class="url" id="tab-url"></div>
+    </section>
+
+    <section class="detected-media-section">
+      <div class="label">Detected Streams (ดักจับสตรีมมีเดีย)</div>
+      <div class="media-list" id="media-list">
+        <div class="no-media">No media streams detected. Play a video or audio to capture.</div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <div class="intercept-row" id="intercept-row">
+        <div class="intercept-label">
+          <span class="intercept-icon">🔀</span>
+          <span>
+            <strong>Intercept Downloads</strong>
+            <span class="intercept-sub" id="intercept-sub">Loading...</span>
+          </span>
+        </div>
+        <label class="toggle-switch" title="Toggle Chrome download interception">
+          <input type="checkbox" id="intercept-toggle" />
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+        </label>
+      </div>
+      <button class="primary" id="download" type="button">Download Page</button>
+      <button class="secondary" id="open-options" type="button">Open Options</button>
+      <button class="secondary" id="toggle-floating" type="button">Hide Floating Button</button>
+    </div>
+
+    <p class="message" id="message"></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
